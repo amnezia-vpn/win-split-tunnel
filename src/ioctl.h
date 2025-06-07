@@ -30,14 +30,16 @@ NTSTATUS
 SetConfigurationPrepare
 (
     WDFREQUEST Request,
-    registeredimage::CONTEXT **Imageset
+    registeredimage::CONTEXT **Imageset,
+    ST_SPLIT_LIST_MODE *Mode
 );
 
 NTSTATUS
 SetConfiguration
 (
     WDFDEVICE Device,
-    registeredimage::CONTEXT *Imageset
+    registeredimage::CONTEXT *Imageset,
+    ST_SPLIT_LIST_MODE Mode
 );
 
 void

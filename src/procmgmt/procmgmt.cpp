@@ -156,8 +156,12 @@ EvaluateSplitting
 )
 {
     auto registeredImage = Context->RegisteredImage->Instance;
+    auto mode = Context->RegisteredImage->Mode;
 
-    if (registeredimage::HasEntryExact(registeredImage, &RegistryEntry->ImageName))
+    const bool inList = registeredimage::HasEntryExact(registeredImage, &RegistryEntry->ImageName);
+
+    if ((mode == ST_SPLIT_LIST_EXCLUDE && inList) ||
+        (mode == ST_SPLIT_LIST_INCLUDE && !inList))
     {
         RegistryEntry->Settings.Split = ST_PROCESS_SPLIT_STATUS_ON_BY_CONFIG;
         ArrivalEvent->SplittingReason |= ST_SPLITTING_REASON_BY_CONFIG;

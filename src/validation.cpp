@@ -26,6 +26,11 @@ ValidateUserBufferConfiguration
         return false;
     }
 
+    if (header->Mode != ST_SPLIT_LIST_EXCLUDE && header->Mode != ST_SPLIT_LIST_INCLUDE)
+    {
+        return false;
+    }
+
     //
     // Verify that the entries reside within the buffer
     //

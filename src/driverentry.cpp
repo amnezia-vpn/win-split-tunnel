@@ -643,8 +643,9 @@ StEvtIoDeviceControlSerial
             if (IoControlCode == IOCTL_ST_SET_CONFIGURATION)
             {
                 registeredimage::CONTEXT *imageset;
+                ST_SPLIT_LIST_MODE mode;
 
-                auto status = ioctl::SetConfigurationPrepare(Request, &imageset);
+                auto status = ioctl::SetConfigurationPrepare(Request, &imageset, &mode);
 
                 if (!NT_SUCCESS(status))
                 {
@@ -656,7 +657,7 @@ StEvtIoDeviceControlSerial
                 //
                 // Potential state transition here.
                 //
-                status = ioctl::SetConfiguration(device, imageset);
+                status = ioctl::SetConfiguration(device, imageset, mode);
 
                 WdfRequestComplete(Request, status);
 

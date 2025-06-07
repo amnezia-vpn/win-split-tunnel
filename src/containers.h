@@ -4,6 +4,7 @@
 #include <wdf.h>
 #include "containers/procregistry.h"
 #include "containers/registeredimage.h"
+#include "defs/config.h"
 
 //
 // The single instance of this struct lives in the device context.
@@ -24,5 +25,6 @@ struct PROCESS_REGISTRY_MGMT
 //
 struct REGISTERED_IMAGE_MGMT
 {
-	registeredimage::CONTEXT * volatile Instance;
+        registeredimage::CONTEXT * volatile Instance;
+        ST_SPLIT_LIST_MODE Mode;
 };
