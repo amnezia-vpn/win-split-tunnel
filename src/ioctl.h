@@ -3,6 +3,7 @@
 #include <ntddk.h>
 #include <wdf.h>
 #include "containers/registeredimage.h"
+#include "defs/config.h"
 
 namespace ioctl
 {
@@ -30,14 +31,16 @@ NTSTATUS
 SetConfigurationPrepare
 (
     WDFREQUEST Request,
-    registeredimage::CONTEXT **Imageset
+    registeredimage::CONTEXT **Imageset,
+    ST_SPLIT_LIST_MODE *Mode
 );
 
 NTSTATUS
 SetConfiguration
 (
     WDFDEVICE Device,
-    registeredimage::CONTEXT *Imageset
+    registeredimage::CONTEXT *Imageset,
+    ST_SPLIT_LIST_MODE Mode
 );
 
 void

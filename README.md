@@ -31,7 +31,9 @@ It will only build on Windows 10, version 2004 or later.
 
 The features mentioned above are wholly implemented in the driver. However, the driver needs a user mode agent to initially and continuously provide it with configuration data.
 
-Specifically, the agent provides a set of application paths that should be excluded from the tunnel. It also communicates the tunnel IPs (IPv4/IPv6) as well as IPs of the primary network interface.
+Specifically, the agent provides a set of application paths and indicates whether
+the list represents processes to exclude from the tunnel or ones that should
+remain inside the tunnel. It also communicates the tunnel IPs (IPv4/IPv6) as well as IPs of the primary network interface.
 
 The agent is required to monitor network interfaces and update the driver with new IPs, as they change.
 
@@ -73,7 +75,10 @@ A single process registry instance is shared between most parts of the driver.
 
 The registered image data structure is used to maintain a set of device paths.
 
-A single instance identifies all executable images that should be excluded from the tunnel. Said instance is shared between IOCTL handlers and the process management subsystem.
+A single instance identifies all executable images that should either be
+excluded from or explicitly included in the tunnel, depending on the configured
+mode. Said instance is shared between IOCTL handlers and the process management
+subsystem.
 
 ## Driver states
 

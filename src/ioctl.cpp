@@ -118,7 +118,11 @@ UpdateTargetSplitSetting
 
     Entry->TargetSettings.Split = ST_PROCESS_SPLIT_STATUS_OFF;
 
-    if (registeredimage::HasEntryExact(context->RegisteredImage.Instance, &Entry->ImageName))
+    auto mode = context->RegisteredImage.Mode;
+    const bool inList = registeredimage::HasEntryExact(context->RegisteredImage.Instance, &Entry->ImageName);
+
+    if ((mode == ST_SPLIT_LIST_EXCLUDE && inList) ||
+        (mode == ST_SPLIT_LIST_INCLUDE && !inList))
     {
         Entry->TargetSettings.Split = ST_PROCESS_SPLIT_STATUS_ON_BY_CONFIG;
     }
@@ -669,7 +673,8 @@ NTSTATUS
 RegisterConfigurationAtReady
 (
     ST_DEVICE_CONTEXT *Context,
-    registeredimage::CONTEXT *Imageset
+    registeredimage::CONTEXT *Imageset,
+    ST_SPLIT_LIST_MODE Mode
 )
 {
     //
@@ -681,6 +686,7 @@ RegisterConfigurationAtReady
         auto oldConfiguration = Context->RegisteredImage.Instance;
 
         Context->RegisteredImage.Instance = Imageset;
+        Context->RegisteredImage.Mode = Mode;
 
         registeredimage::TearDown(&oldConfiguration);
 
@@ -694,6 +700,7 @@ RegisterConfigurationAtReady
     auto oldConfiguration = Context->RegisteredImage.Instance;
 
     Context->RegisteredImage.Instance = Imageset;
+    Context->RegisteredImage.Mode = Mode;
 
     auto status = EnterEngagedState(Context, &Context->IpAddresses);
 
@@ -717,12 +724,14 @@ NTSTATUS
 RegisterConfigurationAtEngaged
 (
     ST_DEVICE_CONTEXT *Context,
-    registeredimage::CONTEXT *Imageset
+    registeredimage::CONTEXT *Imageset,
+    ST_SPLIT_LIST_MODE Mode
 )
 {
     auto oldConfiguration = Context->RegisteredImage.Instance;
 
     Context->RegisteredImage.Instance = Imageset;
+    Context->RegisteredImage.Mode = Mode;
 
     //
     // Update process registry to reflect new configuration.
@@ -885,6 +894,8 @@ Initialize
         goto Abort_teardown_procbroker;
     }
 
+    context->RegisteredImage.Mode = ST_SPLIT_LIST_EXCLUDE;
+
     status = InitializeProcessRegistryMgmt(&context->ProcessRegistry);
 
     if (!NT_SUCCESS(status))
@@ -970,10 +981,12 @@ NTSTATUS
 SetConfigurationPrepare
 (
     WDFREQUEST Request,
-    registeredimage::CONTEXT **Imageset
+    registeredimage::CONTEXT **Imageset,
+    ST_SPLIT_LIST_MODE *Mode
 )
 {
     *Imageset = NULL;
+    *Mode = ST_SPLIT_LIST_EXCLUDE;
 
     PVOID buffer;
     size_t bufferLength;
@@ -998,6 +1011,8 @@ SetConfigurationPrepare
     auto header = (ST_CONFIGURATION_HEADER*)buffer;
     auto entry = (ST_CONFIGURATION_ENTRY*)(header + 1);
     auto stringBuffer = (UCHAR*)(entry + header->NumEntries);
+
+    *Mode = header->Mode;
 
     if (header->NumEntries == 0)
     {
@@ -1061,7 +1076,8 @@ NTSTATUS
 SetConfiguration
 (
     WDFDEVICE Device,
-    registeredimage::CONTEXT *Imageset
+    registeredimage::CONTEXT *Imageset,
+    ST_SPLIT_LIST_MODE Mode
 )
 {
     auto context = DeviceGetSplitTunnelContext(Device);
@@ -1074,13 +1090,13 @@ SetConfiguration
     {
         case ST_DRIVER_STATE_READY:
         {
-            status = RegisterConfigurationAtReady(context, Imageset);
+            status = RegisterConfigurationAtReady(context, Imageset, Mode);
 
             break;
         }
         case ST_DRIVER_STATE_ENGAGED:
         {
-            status = RegisterConfigurationAtEngaged(context, Imageset);
+            status = RegisterConfigurationAtEngaged(context, Imageset, Mode);
 
             break;
         }
@@ -1214,6 +1230,7 @@ GetConfigurationComplete
 
     header->NumEntries = computeContext.NumEntries;
     header->TotalLength = requiredLength;
+    header->Mode = context->RegisteredImage.Mode;
 
     info = requiredLength;
 
