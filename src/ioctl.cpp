@@ -701,7 +701,6 @@ RegisterConfigurationAtReady
 
     Context->RegisteredImage.Instance = Imageset;
     Context->RegisteredImage.Mode = Mode;
-    Context->RegisteredImage.Mode = Mode;
 
     auto status = EnterEngagedState(Context, &Context->IpAddresses);
 
@@ -732,6 +731,7 @@ RegisterConfigurationAtEngaged
     auto oldConfiguration = Context->RegisteredImage.Instance;
 
     Context->RegisteredImage.Instance = Imageset;
+    Context->RegisteredImage.Mode = Mode;
 
     //
     // Update process registry to reflect new configuration.

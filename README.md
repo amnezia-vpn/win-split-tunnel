@@ -75,7 +75,10 @@ A single process registry instance is shared between most parts of the driver.
 
 The registered image data structure is used to maintain a set of device paths.
 
-A single instance identifies all executable images that should be excluded from the tunnel. Said instance is shared between IOCTL handlers and the process management subsystem.
+A single instance identifies all executable images that should either be
+excluded from or explicitly included in the tunnel, depending on the configured
+mode. Said instance is shared between IOCTL handlers and the process management
+subsystem.
 
 ## Driver states
 

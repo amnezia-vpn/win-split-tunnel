@@ -3,6 +3,7 @@
 #include <ntddk.h>
 #include <wdf.h>
 #include "containers/registeredimage.h"
+#include "defs/config.h"
 
 namespace ioctl
 {
